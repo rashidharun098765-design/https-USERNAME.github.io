@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Info Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+</head>
+<body style="font-family: Arial; padding: 20px;">
+
+<h2>Email Info Viewer & QR Generator</h2>
+
+<input type="text" id="email" placeholder="Enter email" style="width: 300px; padding: 8px;">
+<button onclick="generate()">Generate</button>
+
+<h3>This is your Email name:</h3>
+<p id="email-name"></p>
+
+<h3>Show your email photo:</h3>
+<img id="email-photo" width="150" height="150" style="border: 1px solid #ccc;">
+
+<p id="no-photo" style="color: red; font-weight: bold;"></p>
+
+<h3>Your QR Code:</h3>
+<canvas id="qr"></canvas>
+
+<script>
+// MD5 hashing for Gravatar
+function md5(str) {
+    return CryptoJS.MD5(str.trim().toLowerCase()).toString();
+}
+
+function generate() {
+    let email = document.getElementById("email").value;
+    if (!email) {
+        alert("Please enter an email.");
+        return;
+    }
+
+    document.getElementById("email-name").innerText = email;
+
+    let hash = md5(email);
+    let gravatarUrl = "https://www.gravatar.com/avatar/" + hash + "?d=404";
+
+    let img = document.getElementById("email-photo");
+    let noPhoto = document.getElementById("no-photo");
+
+    img.src = gravatarUrl;
+
+    img.onload = function () {
+        noPhoto.innerText = "";
+    };
+
+    img.onerror = function () {
+        noPhoto.innerText = "You don't have email photo. Why bro?";
+        img.src = "";
+    };
+
+    let finalUrl = window.location.href.split("?")[0] + "?email=" + encodeURIComponent(email);
+
+    let qr = new QRious({
+        element: document.getElementById("qr"),
+        value: finalUrl,
+        size: 200
+    });
+}
+
+function getQueryEmail() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("email");
+}
+
+window.onload = function () {
+    let email = getQueryEmail();
+    if (email) {
+        document.getElementById("email").value = email;
+        generate();
+    }
+};
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+
+</body>
+</html>
